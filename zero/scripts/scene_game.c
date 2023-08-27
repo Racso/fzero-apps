@@ -612,6 +612,9 @@ void game_handle_input(InputKey key, InputType type, void* context) {
     if(type != InputTypePress) return;
 
     if(key == InputKeyBack) {
+        if (suit_selector_is_enabled(&suitSelector)) {
+            suit_selector_set_enabled(&suitSelector, false);
+        }
         scene_manager_set_scene(app->sceneManager, SceneType_Menu);
         return;
     }
