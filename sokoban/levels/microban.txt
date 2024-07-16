@@ -32,24 +32,22 @@ This set also contains puzzles which I thought were interesting but too
 easy to include in my regular sets.
 
 1
-####
-# .#
-#  ###
-#*@  #
-#  $ #
-#  ###
-####
+#######
+#  *  #
+#. @  #
+### $##
+  #  #
+  ####
 Title: Microban 1
 Author: David W Skinner
 
 2
-######
-#    #
-# #@ #
-# $* #
-# .* #
-#    #
-######
+#######
+#     #
+# #$. #
+# @** #
+#     #
+#######
 Title: Microban 2
 Author: David W Skinner
 
@@ -95,41 +93,35 @@ Title: Microban 6
 Author: David W Skinner
 
 7
-#######
-#     #
-# .$. #
-# $.$ #
-# .$. #
-# $.$ #
-#  @  #
-#######
+########
+#      #
+# .$.$ #
+# $.$.@#
+# .$.$ #
+#      #
+########
 Title: Microban 7
 Author: David W Skinner
 
 8
-  ######
-  # ..@#
-  # $$ #
-  ## ###
-   # #
-   # #
-#### #
-#    ##
-# #   #
-#   # #
-###   #
-  #####
+      #####
+      #   #
+####  # # ##
+#  ####    #
+#.$      # #
+#.$#####   #
+#@ #   #####
+####
 Title: Microban 8
 Author: David W Skinner
 
 9
-#####
-#.  ##
-#@$$ #
-##   #
- ##  #
-  ##.#
-   ###
+####
+#.@##
+# $ ##
+# $  ##
+##   .#
+ ######
 Title: Microban 9
 Author: David W Skinner
 
@@ -170,15 +162,13 @@ Title: Microban 12
 Author: David W Skinner
 
 13
-####
-#. ##
-#.@ #
-#. $#
-##$ ###
- # $  #
- #    #
- #  ###
- ####
+#####
+#...#####
+# @ $   #
+## $ $  #
+ ####  ##
+    #  #
+    ####
 Title: Microban 13
 Author: David W Skinner
 
@@ -216,26 +206,23 @@ Title: Microban 16
 Author: David W Skinner
 
 17
-#####
-# @ #
-#...#
-#$$$##
-#    #
-#    #
-######
+#######
+# .$  #
+#@.$  #
+# .$  #
+####  #
+   ####
 Title: Microban 17
 Author: David W Skinner
 
 18
-#######
-#     #
-#. .  #
-# ## ##
-#  $ #
-###$ #
-  #@ #
-  #  #
-  ####
+######
+# .  #
+#  # ####
+# .#$$@ #
+#       #
+#  ######
+####
 Title: Microban 18
 Author: David W Skinner
 
@@ -275,14 +262,12 @@ Author: David W Skinner
 
 22
 #####
-#   ###
-#. .  #
-#   # #
-## #  #
- #@$$ #
- #    #
- #  ###
- ####
+# . #####
+#    @  #
+# . #$  #
+## # $ ##
+ #     #
+ #######
 Title: Microban 22
 Author: David W Skinner
 
@@ -320,14 +305,12 @@ Title: Microban 25
 Author: David W Skinner
 
 26
- #####
- # @ #
- #   #
-###$ #
-# ...#
-# $$ #
-###  #
-  ####
+   ####
+####  #
+#  #.$##
+#@ $.$ #
+#   .  #
+########
 Title: Microban 26
 Author: David W Skinner
 
@@ -367,13 +350,12 @@ Title: Microban 29
 Author: David W Skinner
 
 30
-####
-#  ###
-# $$ #
-#... #
-# @$ #
-#   ##
-#####
+#######
+#  .  #
+# $.@ #
+##$.$ #
+ #   ##
+ #####
 Title: Microban 30
 Author: David W Skinner
 
@@ -421,16 +403,12 @@ Title: Microban 34
 Author: David W Skinner
 
 35
- ####
-##  #
-#. $#
-#.$ #
-#.$ #
-#.$ #
-#. $##
-#   @#
-##   #
- #####
+ ########
+##..... ##
+#  $$$   #
+# $   $  #
+#######@ #
+      ####
 Title: Microban 35
 Author: David W Skinner
 
@@ -500,14 +478,13 @@ Title: Microban 41
 Author: David W Skinner
 
 42
-   ####
-   #  #
-   #@ #
-####$.#
-#   $.#
-# # $.#
-#    ##
-######
+   #####
+   #   #
+   # # #
+####   #
+# @$$$ #
+#  ...##
+#######
 Title: Microban 42
 Author: David W Skinner
 
@@ -535,25 +512,23 @@ Comment:
 Comment-End:
 
 45
-######
-#... #
-#  $ #
-# #$##
-#  $ #
-#  @ #
-######
+#######
+#.    #
+#. #  #
+#.$$$@#
+#  #  #
+#######
 Title: Microban 45
 Author: David W Skinner
 
 46
- ######
-##    #
-#  ## #
-# # $ #
-#  * .#
-## #@##
- #   #
  #####
+##   ###
+#  #   #
+# # *# #
+# #$ @ #
+#   .###
+######
 Title: Microban 46
 Author: David W Skinner
 
@@ -582,15 +557,13 @@ Author: David W Skinner
 
 49
 ######
-# @  #
-# $# #
-# $  #
-# $ ##
-### ####
- #  #  #
- #...  #
- #     #
- #######
+#    #####
+#@$$$# . #
+# #    . #
+#   ###. #
+######   #
+     #   #
+     #####
 Title: Microban 49
 Author: David W Skinner
 
@@ -617,14 +590,12 @@ Title: Microban 51
 Author: David W Skinner
 
 52
-  ####
-### @#
-#  $ #
-#  *.#
-#  *.#
-#  $ #
-###  #
-  ####
+ ######
+ #    #
+##    ##
+# $**$ #
+#@ ..  #
+########
 Title: Microban 52
 Author: David W Skinner
 
@@ -674,15 +645,14 @@ Title: Microban 56
 Author: David W Skinner
 
 57
-  ####
-  #  #
-  #@ #
-  #  #
-### ####
-#    * #
-#  $   #
-#####. #
     ####
+    #  #
+#####  #
+# @   $#
+#   #  ##
+#####* .#
+    #   #
+    #####
 Title: Microban 57
 Author: David W Skinner
 
@@ -728,13 +698,12 @@ Author: David W Skinner
 ########
 #      #
 # #### #
-# #...@#
-# ###$###
-# #     #
-#  $$ $ #
-####   ##
-   #.###
-   ###
+# #.# $###
+# #.# $ .#
+# #.$   ##
+#  @# $ #
+#####  ##
+    ####
 Title: Microban 61
 Author: David W Skinner
 
@@ -785,32 +754,26 @@ Title: Microban 65
 Author: David W Skinner
 
 66
-   ###
-   #@#
- ###$###
-##  .  ##
-#  # #  #
-# #   # #
-# #   # #
-# #   # #
-#  # #  #
-## $ $ ##
- ##. .##
-  #   #
-  #   #
-  #####
+   #######
+  ##     ##
+  #  ###  ####
+### #   #$.  #
+#@$.         #
+### #   #$.  #
+  #  ###  ####
+  ##     ##
+   #######
 Title: Microban 66
 Author: David W Skinner
 
 67
 #####
-#   ##
-# #  #
-#@$*.##
-##  . #
- # $# #
- ##   #
-  #####
+#  @###
+# #$  ##
+#  * $ #
+## ..# #
+ ###   #
+   #####
 Title: Microban 67
 Author: David W Skinner
 
@@ -838,16 +801,14 @@ Title: Microban 69
 Author: David W Skinner
 
 70
-#####
-# @ ####
-#      #
-# $ $$ #
-##$##  #
-#   ####
-# ..  #
-##..  #
- ###  #
-   ####
+########
+#   #  ##
+#@ $$ ..#
+#   # ..##
+## $##   #
+ # $ #   #
+ #   #####
+ #####
 Title: Microban 70
 Author: David W Skinner
 
@@ -865,31 +826,28 @@ Title: Microban 71
 Author: David W Skinner
 
 72
-  ####
- ##  #####
- #  $  @ #
- #  $#   #
-#### #####
-#  #   #
-#    $ #
-# ..#  #
-#  .####
-#  ##
-####
+    #######
+ ####     #
+##  #  .  #
+#   ## ..##
+# $$   ###
+## ## $ #
+ #  #   #
+ #@ #####
+ #  #
+ ####
 Title: Microban 72
 Author: David W Skinner
 
 73
-####
-#  #####
-# $$ $ #
-#      #
-## ## ##
-#...#@#
-# ### ##
-#      #
-#  #   #
-########
+##########
+#   #.   #
+# $  .#  #
+##$ #.# ##
+ #  ###  #
+ #$  @   #
+ #  ###  #
+ #### ####
 Title: Microban 73
 Author: David W Skinner
 
@@ -917,16 +875,15 @@ Title: Microban 75
 Author: David W Skinner
 
 76
- #####
-##   #
-#    #####
-#  #.#   #
-#@ #.# $ #
-#  #.#  ##
-#    #  #
-##  ##$$#
- ##     #
-  #  ####
+ #######
+##  @  ##
+#       ###
+#  ###    #
+#  ... #  #
+######## ##
+  #    $ #
+  # $  $ #
+  #  #####
   ####
 Title: Microban 76
 Author: David W Skinner
@@ -965,30 +922,26 @@ Title: Microban 79
 Author: David W Skinner
 
 80
-####
-#  #######
-#  . ## .#
-# $#    .#
-## ## # .#
- #    #  #
- #### #  #
-  # @$ ###
-  # $$ #
-  #    #
-  ######
+#####
+#   ###
+#  $  #####
+##.## #   #
+ #  # #@$ #
+ ##    $$ #
+ ## ###   #
+ #     ####
+ #...  #
+ #######
 Title: Microban 80
 Author: David W Skinner
 
 81
- #####
- #   #
- # . #
-## * #
-#  *##
-#  @##
-## $ #
- #   #
- #####
+   ####
+####  ###
+#       #
+# .**@$ #
+#   ##  #
+#########
 Title: Microban 81
 Author: David W Skinner
 
@@ -1005,16 +958,14 @@ Title: Microban 82
 Author: David W Skinner
 
 83
-######
-#    ##
-# $ $ ##
-## $$  #
- # #   #
- # ## ##
- #  . .#
- # @. .#
- #  ####
- ####
+####
+#  #######
+# $      #
+#  $## @ #
+# $$ #..##
+##      #
+ ##  #..#
+  #######
 Title: Microban 83
 Author: David W Skinner
 
@@ -1060,32 +1011,30 @@ Title: Microban 86
 Author: David W Skinner
 
 87
-     ####
-######  #
-#       #
-#  ... .#
-##$######
-# $  #
-#   $###
-##  $  #
- ## @  #
-  ######
+ #######
+ #  #  ##
+ #  $$  ##
+ # .#    #
+ # .# $$@#
+## .###  #
+#   # #  #
+#  .# ####
+#####
 Title: Microban 87
 Author: David W Skinner
 
 88
-     ####
- # ###  #
- # #    #
- # #  # #
- # #$ #.#
- # #  # # #
- # #$ #.# #
-   #  # # #
-####$ #.# #
-# @     # #
-#   #  ## #
-########
+        ####
+ ###### #  #
+        #@ #
+ ########  #
+ #  $ $ $ ##
+##         #
+#  ######  #
+#   . . . ##
+###########
+
+     ######
 Title: Microban 88
 Author: David W Skinner
 
@@ -1354,19 +1303,15 @@ Title: Microban 108
 Author: David W Skinner
 
 109
-  #######
-# #     #
-# # # # #
-  # @ $ #
-### ### #
-#   ### #
-# $  ##.#
-## $  #.#
- ## $  .#
-# ## $#.#
-## ## #.#
-### #   #
-### #####
+ ## #### ####
+    #  ## ###
+##### $ ## ##
+#      $ ##
+# #@##  $ ###
+#   ###  $  #
+# #$#### ## #
+#     ..... #
+#############
 Title: Microban 109
 Author: David W Skinner
 
@@ -1384,35 +1329,29 @@ Title: Microban 110
 Author: David W Skinner
 
 111
-######
-#    ####
-#    ...#
-#    ...#
-######  #
-  #  #  #
-  # $$ ##
-  # @$  #
-  # $$  #
-  ## $# #
-   #    #
-   ######
+#####
+#   #
+#   ######
+#   #    ###
+#   # $@$  #
+##..##$$$$ #
+ #..     # #
+ #..  #    #
+ ###########
 Title: Microban 111
 Author: David W Skinner
 
 112
  #####
-##   ####
-#  $$$  #
-# #   $ #
-#   $## ##
-###  #.  #
-  #  #   #
- ##### ###
- #   # ##
- # @....#
- #      #
- #   #  #
- ########
+##   # ######
+#  # ###    #
+# $    # @  #
+# $ $  # .  #
+##$ #####. ##
+ # $#.   .  #
+ #     ##.  #
+ ####  ######
+    ####
 Title: Microban 112
 Author: David W Skinner
 
@@ -1498,16 +1437,15 @@ Title: Microban 118
 Author: David W Skinner
 
 119
-  ######
-  #    ##
- ## ##  #
- # $$ # #
- # @$ # #
- #    # #
-#### #  #
-#  ... ##
-#     ##
-#######
+      ####
+  #####  #
+###   #  #
+#  $@ #. #
+# #$$  . #
+# #   #. #
+#  ###  ##
+##     ##
+ #######
 Title: Microban 119
 Author: David W Skinner
 
@@ -1542,18 +1480,17 @@ Title: Microban 121
 Author: David W Skinner
 
 122
-#####
-#   ###
-# #$  #
-# $   #
-# $ $ #
-# $#  #
-#  @###
-## ########
-#      ...#
-#         #
-########..#
-       ####
+###########
+#      #  #
+# #$$$    #
+# $  #@#  #
+##  $ ##  #
+ #    ##  #
+ #######  #
+       #. ##
+       #. .#
+       #. .#
+       #####
 Title: Microban 122
 Author: David W Skinner
 
@@ -1657,17 +1594,13 @@ Title: Microban 130
 Author: David W Skinner
 
 131
-#####
-#   #
-# . #
-#.@.###
-##.#  #
-#  $  #
-# $   #
-##$$  #
- #  ###
- #  #
- ####
+########
+#  .#  ####
+# .@. $$  #
+#  .#$ $  #
+####    ###
+   #    #
+   ######
 Title: Microban 131
 Author: David W Skinner
 
@@ -1817,21 +1750,15 @@ Title: Microban 142
 Author: David W Skinner
 
 143
-####
-#  ####
-# $   #
-# .#  #
-# $# ##
-# .  #
-#### #
-   # #
- ### ###
- #  $  #
-## #$# ##
-# $ @ $ #
-# ..#.. #
-###   ###
-  #####
+#######   ####
+#     # ###  #
+# $.$.# #  $.##
+## ## ### # . #
+ #       $$@# #
+ #  ##### # . #
+ ####   #  $.##
+        ###  #
+          ####
 Title: Microban 143
 Author: David W Skinner
 
@@ -1911,18 +1838,16 @@ from "Original 18"
 Comment-End:
 
 149
- ####
-##  ###
-#@$   #
-### $ #
- #  ######
- #  $....#
- #  # ####
- ## # #
- # $# #
- #    #
- #  ###
- ####
+ ###
+##@#########
+# $#   #   #
+#       $  #
+## $#$### ##
+ #  #.    #
+ ####.#####
+    #.#
+    #.#
+    ###
 Title: Microban 149
 Author: David W Skinner
 Comment:
