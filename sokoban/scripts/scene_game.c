@@ -11,6 +11,7 @@
 #include "wave/files/file_lines_reader.h"
 #include "wave/exception_manager.h"
 #include "racso_sokoban_icons.h"
+#include <dolphin/dolphin.h>
 #include <gui/gui.h>
 #include <furi.h>
 #include <string.h>
@@ -470,6 +471,7 @@ void verify_level_completed(GameState* state)
     }
 
     game.isCompleted = true;
+    dolphin_deed(DolphinDeedPluginGameWin);
 }
 
 void apply_input(GameState* gameState, int dx, int dy, Level* level)
