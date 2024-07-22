@@ -471,7 +471,6 @@ void verify_level_completed(GameState* state)
     }
 
     game.isCompleted = true;
-    dolphin_deed(DolphinDeedPluginGameWin);
 }
 
 void apply_input(GameState* gameState, int dx, int dy, Level* level)
@@ -588,6 +587,7 @@ void game_handle_input(InputKey key, InputType type, void* context)
     {
         FURI_LOG_D("GAME", "Level completed in %d pushes", gameState->pushesCount);
 
+        dolphin_deed(DolphinDeedPluginGameWin);
         AppGameplayState* gameplayState = app->gameplay;
         LevelsDatabase* database = app->database;
 
