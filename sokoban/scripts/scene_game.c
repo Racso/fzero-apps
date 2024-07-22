@@ -39,6 +39,7 @@ typedef enum
 typedef struct Level
 {
     int level_width, level_height;
+    int cell_size;
     CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
 } Level;
 
@@ -120,111 +121,101 @@ void victory_popup_handle_input(InputKey key, InputType type, AppContext* app)
     }
 }
 
-bool level_reader_parse_symbol(char ch, CellType* cellType)
+static int level_reader_parse_row(const char* line, CellType* row)
 {
-    switch (ch)
+    const char *ch = line;
+    int i = 0;
+    while (true)
     {
-    case '#':
-        *cellType = CellType_Wall;
-        return true;
-    case '*':
-        *cellType = CellType_BoxOnTarget;
-        return true;
-    case '.':
-        *cellType = CellType_Target;
-        return true;
-    case '@':
-        *cellType = CellType_Player;
-        return true;
-    case '+':
-        *cellType = CellType_PlayerOnTarget;
-        return true;
-    case '$':
-        *cellType = CellType_Box;
-        return true;
-    case ' ':
-        *cellType = CellType_Empty;
-        return true;
-    default:
-        return false;
+        if (i >= MAX_BOARD_SIZE)
+            return -1;
+        switch (*(ch++))
+        {
+        case '\0':
+            return i;
+        case '#':
+            row[i++] = CellType_Wall;
+            break;
+        case '*':
+            row[i++] = CellType_BoxOnTarget;
+            break;
+        case '.':
+            row[i++] = CellType_Target;
+            break;
+        case '@':
+            row[i++] = CellType_Player;
+            break;
+        case '+':
+            row[i++] = CellType_PlayerOnTarget;
+            break;
+        case '$':
+            row[i++] = CellType_Box;
+            break;
+        case ' ':
+            row[i++] = CellType_Empty;
+            break;
+        default:
+            return -2;
+        }
     }
 }
 
-bool level_reader_is_level_line(const char* line)
+static int level_reader_calculate_cell_size(int width, int height)
 {
-    for (int i = 0; line[i] != '\0'; i++)
-    {
-        CellType cellType;
-        if (!level_reader_parse_symbol(line[i], &cellType))
-            return false;
-    }
-
-    return true;
-}
-
-bool level_reader_is_level_start_mark(const char* line)
-{
-    bool hasNumber = false;
-    for (int i = 0; line[i] != '\0'; i++)
-    {
-        if (line[i] >= '0' && line[i] <= '9')
-            hasNumber = true;
-        else if (line[i] != ' ')
-            return false;
-    }
-
-    return hasNumber;
+    int cellSize = 9;
+    if (width * cellSize > 128 || height * cellSize > 64)
+        cellSize = 7;
+    if (width * cellSize > 128 || height * cellSize > 64)
+        cellSize = 5;
+    return cellSize;
 }
 
 void level_reader_load_level(Level* ret_level, FileLinesReader* reader, int levelIndex)
 {
-    ret_level->level_width = 0;
-    ret_level->level_height = 0;
-    for (int i = 0; i < MAX_BOARD_SIZE; i++)
-        for (int j = 0; j < MAX_BOARD_SIZE; j++)
-            ret_level->board[i][j] = CellType_Empty;
+    CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE] = {CellType_Empty};
+    int columnCount = 0, rowCount = 0;
+    char line[MAX_READ_BUFFER_SIZE];
 
-    for (int currentLevelFound = 0; currentLevelFound <= levelIndex; currentLevelFound++)
+    char levelStartMark[16];
+    snprintf(levelStartMark, sizeof(levelStartMark), "%d", levelIndex + 1);
+
+    bool levelFound = false;
+    while (!levelFound && file_lines_reader_readln(reader, line, sizeof(line)))
+        if (strncmp(levelStartMark, line, sizeof(levelStartMark)) == 0)
+            levelFound = true;
+
+    furi_check(levelFound, "level not found");
+
+    while (file_lines_reader_readln(reader, line, sizeof(line)))
     {
-        char line[MAX_READ_BUFFER_SIZE];
-
-        while (!level_reader_is_level_start_mark(line))
-        {
-            file_lines_reader_readln(reader, line, MAX_READ_BUFFER_SIZE);
-            if (file_lines_reader_is_eof(reader))
-                return;
-        };
-
-        for (int i = 0; i < MAX_BOARD_SIZE; i++)
-        {
-            if (file_lines_reader_is_eof(reader))
-                return;
-
-            file_lines_reader_readln(reader, line, MAX_READ_BUFFER_SIZE);
-            if (!level_reader_is_level_line(line))
-                break;
-
-            if (currentLevelFound < levelIndex)
-                continue;
-
-            ret_level->level_height += 1;
-
-            int lineLen = strlen(line);
-            if (lineLen > ret_level->level_width)
-                ret_level->level_width = lineLen;
-
-            for (int j = 0; j < lineLen; j++)
-            {
-                CellType cellType;
-                if (level_reader_parse_symbol(line[j], &cellType))
-                    ret_level->board[i][j] = cellType;
-            }
-        }
-
-        if (currentLevelFound == levelIndex)
-            return;
+        int rowSize = level_reader_parse_row(line, board[rowCount]);
+        if (rowSize < 0)
+            break;
+        if (rowSize > columnCount)
+            columnCount = rowSize;
+        rowCount += 1;
+        if (rowCount >= MAX_BOARD_SIZE)
+            break;
     }
-    return;
+
+    int naturalCellSize = level_reader_calculate_cell_size(columnCount, rowCount);
+    int rotatedCellSize = level_reader_calculate_cell_size(rowCount, columnCount);
+    if (naturalCellSize >= rotatedCellSize)
+    {
+        ret_level->cell_size = naturalCellSize;
+        ret_level->level_width = columnCount;
+        ret_level->level_height = rowCount;
+        memcpy(ret_level->board, board, sizeof(board));
+    }
+    else
+    {
+        ret_level->cell_size = rotatedCellSize;
+        ret_level->level_width = rowCount;
+        ret_level->level_height = columnCount;
+        for (int row = 0; row < rowCount; row++)
+            for (int column = 0; column < columnCount; column++)
+                ret_level->board[column][row] = board[row][column];
+    }
 }
 
 const Icon* findIcon(CellType cellType, int size)
@@ -310,10 +301,11 @@ const Icon* findIcon(CellType cellType, int size)
     return NULL;
 }
 
-void draw_game(Canvas* const canvas, GameContext* game, int cellSize)
+void draw_game(Canvas* const canvas, GameContext* game)
 {
     GameState* state = stack_peek(game->states);
 
+    int cellSize = game->level->cell_size;
     int canvasSizeX = 128 / cellSize;
     int canvasSizeY = 64 / cellSize;
     int centerX = canvasSizeX / 2;
@@ -362,13 +354,7 @@ void game_render_callback(Canvas* const canvas, void* context)
     if (state == NULL || level == NULL)
         return;
 
-    int cellSize = 9;
-    if (level->level_width * cellSize > 128 || level->level_height * cellSize > 64)
-        cellSize = 7;
-    if (level->level_width * cellSize > 128 || level->level_height * cellSize > 64)
-        cellSize = 5;
-
-    draw_game(canvas, &game, cellSize);
+    draw_game(canvas, &game);
 
     if (game.isCompleted)
         victory_popup_render_callback(canvas, app);
