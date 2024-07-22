@@ -343,11 +343,23 @@ void game_render_callback(Canvas* const canvas, void* context)
     if (state == NULL || level == NULL)
         return;
 
+    #define SCREEN_WIDTH (128 + (cellSize - 1) * 2)
+    #define SCREEN_HEIGHT (64 + (cellSize - 1) * 2)
+
+    #define LEVEL_WIDTH (level->level_width * cellSize)
+    #define LEVEL_HEIGHT (level->level_height * cellSize)
+
     int cellSize = 9;
-    if (level->level_width * cellSize > 128 || level->level_height * cellSize > 64)
+    if (LEVEL_WIDTH > SCREEN_WIDTH || LEVEL_HEIGHT > SCREEN_HEIGHT)
         cellSize = 7;
-    if (level->level_width * cellSize > 128 || level->level_height * cellSize > 64)
+    if (LEVEL_WIDTH > SCREEN_WIDTH || LEVEL_HEIGHT > SCREEN_HEIGHT)
         cellSize = 5;
+
+    #undef SCREEN_WIDTH
+    #undef SCREEN_HEIGHT
+
+    #undef LEVEL_WIDTH
+    #undef LEVEL_HEIGHT
 
     draw_game(canvas, &game, cellSize);
 
