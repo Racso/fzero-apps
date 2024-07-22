@@ -133,6 +133,14 @@ void menu_render_callback(Canvas* const canvas, void* context)
     }
 }
 
+static int get_first_unplayed_level_index(LevelsCollection* collection)
+{
+    for (int i = 0; i < collection->levelsCount; i++)
+        if (collection->levels[i].playerBest == 0)
+            return i;
+    return collection->levelsCount - 1;
+}
+
 void menu_input_callback(InputKey key, InputType type, void* context)
 {
     AppContext* app = (AppContext*)context;
@@ -163,7 +171,10 @@ void menu_input_callback(InputKey key, InputType type, void* context)
         if (state == MenuState_Main)
             gameplayState->selectedCollection = 0;
         else if (state == MenuState_CollectionSelection)
-            gameplayState->selectedLevel = 0;
+        {
+            LevelsCollection *collection = &database->collections[gameplayState->selectedCollection];
+            gameplayState->selectedLevel = get_first_unplayed_level_index(collection);
+        }
         else if (state == MenuState_LevelSelection)
         {
             scene_manager_set_scene(app->sceneManager, SceneType_Game);
