@@ -313,39 +313,21 @@ void draw_game(Canvas* const canvas, GameContext* game, int cellSize)
 {
     GameState* state = stack_peek(game->states);
 
-    int canvasSizeX = 128 / cellSize;
-    int canvasSizeY = 64 / cellSize;
-    int centerX = canvasSizeX / 2;
-    int centerY = canvasSizeY / 2;
-    int fromX, toX, fromY, toY;
+    int w = game->level->level_width * cellSize;
+    int h = game->level->level_height * cellSize;
 
-    fromX = MAX(0, state->playerX - centerX);
-    fromY = MAX(0, state->playerY - centerY);
-    toX = fromX + canvasSizeX;
-    toY = fromY + canvasSizeY;
+    int dx = 128 / 2;
+    int dy = 64 / 2;
 
-    if (toX > game->level->level_width)
+    for (int row = 0; row < game->level->level_height; row++)
     {
-        fromX -= toX - game->level->level_width;
-        toX = game->level->level_width;
-    }
-    if (toY > game->level->level_height)
-    {
-        fromY -= toY - game->level->level_height;
-        toY = game->level->level_height;
-    }
-
-    fromX = MAX(0, fromX);
-    fromY = MAX(0, fromY);
-
-    for (int y = fromY; y < toY; y++)
-    {
-        for (int x = fromX; x < toX; x++)
+        for (int col = 0; col < game->level->level_width; col++)
         {
-            int cellX = (x - fromX) * cellSize, cellY = (y - fromY) * cellSize;
-            const Icon* icon = findIcon(state->board[y][x], cellSize);
+            int x = dx + col * cellSize - w / 2;
+            int y = dy + row * cellSize - h / 2;
+            const Icon* icon = findIcon(state->board[row][col], cellSize);
             if (icon)
-                canvas_draw_icon(canvas, cellX, cellY, icon);
+                canvas_draw_icon(canvas, x, y, icon);
         }
     }
 }
