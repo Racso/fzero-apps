@@ -22,7 +22,6 @@
 #define MAX_READ_BUFFER_SIZE 256
 #define MAX_FILENAME_LEN 256
 #define MAX_BOARD_SIZE 50
-#define CELL_SIZE 9
 #define MAX_UNDO_STATES 10
 
 typedef enum
@@ -162,12 +161,18 @@ static int level_reader_parse_row(const char* line, CellType* row)
 
 static int level_reader_calculate_cell_size(int width, int height)
 {
+    #define MAX_WIDTH (128 + (cellSize - 1) * 2)
+    #define MAX_HEIGHT (64 + (cellSize - 1) * 2)
+
     int cellSize = 9;
-    if (width * cellSize > 128 || height * cellSize > 64)
+    if (width * cellSize > MAX_WIDTH || height * cellSize > MAX_HEIGHT)
         cellSize = 7;
-    if (width * cellSize > 128 || height * cellSize > 64)
+    if (width * cellSize > MAX_WIDTH || height * cellSize > MAX_HEIGHT)
         cellSize = 5;
     return cellSize;
+
+    #undef MAX_WIDTH
+    #undef MAX_HEIGHT
 }
 
 void level_reader_load_level(Level* ret_level, FileLinesReader* reader, int levelIndex)
@@ -304,41 +309,38 @@ const Icon* findIcon(CellType cellType, int size)
 void draw_game(Canvas* const canvas, GameContext* game)
 {
     GameState* state = stack_peek(game->states);
+    Level *level = game->level;
 
-    int cellSize = game->level->cell_size;
-    int canvasSizeX = 128 / cellSize;
-    int canvasSizeY = 64 / cellSize;
-    int centerX = canvasSizeX / 2;
-    int centerY = canvasSizeY / 2;
-    int fromX, toX, fromY, toY;
+    int cellSize = level->cell_size;
+    int levelWidth = level->level_width * cellSize;
+    int levelHeight = level->level_height * cellSize;
 
-    fromX = MAX(0, state->playerX - centerX);
-    fromY = MAX(0, state->playerY - centerY);
-    toX = fromX + canvasSizeX;
-    toY = fromY + canvasSizeY;
+    int playerX = state->playerX * cellSize;
+    int playerY = state->playerY * cellSize;
 
-    if (toX > game->level->level_width)
+    int screenWidth = 128;
+    int screenHeight = 64;
+
+    int minScrollingWidth = screenWidth + (cellSize - 1) * 2;
+    int minScrollingHeight = screenHeight + (cellSize - 1) * 2;
+
+    int cameraX = levelWidth / 2;
+    if (levelWidth > minScrollingWidth)
+        cameraX = MAX(screenWidth / 2, MIN(playerX, levelWidth - screenWidth / 2));
+
+    int cameraY = levelHeight / 2;
+    if (levelHeight > minScrollingHeight)
+        cameraY = MAX(screenHeight / 2, MIN(playerY, levelHeight - screenHeight / 2));
+
+    for (int row = 0; row < level->level_height; row++)
     {
-        fromX -= toX - game->level->level_width;
-        toX = game->level->level_width;
-    }
-    if (toY > game->level->level_height)
-    {
-        fromY -= toY - game->level->level_height;
-        toY = game->level->level_height;
-    }
-
-    fromX = MAX(0, fromX);
-    fromY = MAX(0, fromY);
-
-    for (int y = fromY; y < toY; y++)
-    {
-        for (int x = fromX; x < toX; x++)
+        for (int column = 0; column < level->level_width; column++)
         {
-            int cellX = (x - fromX) * cellSize, cellY = (y - fromY) * cellSize;
-            const Icon* icon = findIcon(state->board[y][x], cellSize);
+            int x = column * cellSize - cameraX + screenWidth / 2;
+            int y = row * cellSize - cameraY + screenHeight / 2;
+            const Icon* icon = findIcon(state->board[row][column], cellSize);
             if (icon)
-                canvas_draw_icon(canvas, cellX, cellY, icon);
+                canvas_draw_icon(canvas, x, y, icon);
         }
     }
 }
