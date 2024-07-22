@@ -11,6 +11,7 @@
 #include "wave/files/file_lines_reader.h"
 #include "wave/exception_manager.h"
 #include "racso_sokoban_icons.h"
+#include <dolphin/dolphin.h>
 #include <gui/gui.h>
 #include <furi.h>
 #include <string.h>
@@ -586,6 +587,7 @@ void game_handle_input(InputKey key, InputType type, void* context)
     {
         FURI_LOG_D("GAME", "Level completed in %d pushes", gameState->pushesCount);
 
+        dolphin_deed(DolphinDeedPluginGameWin);
         AppGameplayState* gameplayState = app->gameplay;
         LevelsDatabase* database = app->database;
 
