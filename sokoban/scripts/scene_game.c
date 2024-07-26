@@ -24,14 +24,11 @@ typedef struct GameState
     CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
 } GameState;
 
-typedef struct GameContext
-{
+static struct {
     Stack* states;
     Level* level;
     bool isCompleted;
-} GameContext;
-
-static GameContext game;
+} game;
 
 // Victory Popup component
 void victory_popup_render_callback(Canvas* const canvas, AppContext* app)
@@ -179,10 +176,10 @@ const Icon* findIcon(CellType cellType, int size)
     return NULL;
 }
 
-void draw_game(Canvas* const canvas, GameContext* game)
+void draw_game(Canvas* const canvas)
 {
-    GameState* state = stack_peek(game->states);
-    Level *level = game->level;
+    GameState* state = stack_peek(game.states);
+    Level *level = game.level;
 
     int cellSize = level->cell_size;
     int levelWidth = level->level_width * cellSize;
@@ -229,7 +226,7 @@ void game_render_callback(Canvas* const canvas, void* context)
     if (state == NULL || level == NULL)
         return;
 
-    draw_game(canvas, &game);
+    draw_game(canvas);
 
     if (game.isCompleted)
         victory_popup_render_callback(canvas, app);
@@ -350,7 +347,7 @@ void apply_input(GameState* gameState, int dx, int dy, Level* level)
     gameState->playerY = newY;
 }
 
-void game_handle_player_input(InputKey key, InputType type, GameContext* gameContext)
+void game_handle_player_input(InputKey key, InputType type)
 {
     if (type != InputTypePress && type != InputTypeRepeat)
         return;
@@ -374,8 +371,8 @@ void game_handle_player_input(InputKey key, InputType type, GameContext* gameCon
         return;
     }
 
-    Level* level = gameContext->level;
-    GameState* previousGameState = stack_peek(gameContext->states);
+    Level* level = game.level;
+    GameState* previousGameState = stack_peek(game.states);
     GameState* gameState = malloc(sizeof(GameState));
     memcpy(gameState, previousGameState, sizeof(GameState));
 
@@ -383,13 +380,13 @@ void game_handle_player_input(InputKey key, InputType type, GameContext* gameCon
 
     if (gameState->playerX != previousGameState->playerX || gameState->playerY != previousGameState->playerY)
     {
-        if (stack_count(gameContext->states) >= MAX_UNDO_STATES)
+        if (stack_count(game.states) >= MAX_UNDO_STATES)
         {
-            GameState* state = stack_discard_bottom(gameContext->states);
+            GameState* state = stack_discard_bottom(game.states);
             free(state);
         }
 
-        stack_push(gameContext->states, gameState);
+        stack_push(game.states, gameState);
         verify_level_completed(gameState);
     }
     else
@@ -425,7 +422,7 @@ void game_handle_input(InputKey key, InputType type, void* context)
         return;
     }
 
-    game_handle_player_input(key, type, &game);
+    game_handle_player_input(key, type);
     gameState = stack_peek(game.states);
 
     if (game.isCompleted)
