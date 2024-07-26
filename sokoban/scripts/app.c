@@ -17,7 +17,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 #include "scene_menu.h"
 #include "scene_game.h"
 #include "scene_credits.h"
-#include "save_data_manager.h"
+#include "levels_database.h"
 #include "wave/scene_management.h"
 #include "wave/exception_manager.h"
 
