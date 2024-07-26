@@ -1,12 +1,12 @@
 #include "scene_game.h"
 #include "app.h"
 #include "levels_database.h"
+#include "level.h"
 #include "wave/scene_management.h"
 #include "wave/calc.h"
 #include "wave/data_structures/stack.h"
 #include "wave/data_structures/list.h"
 #include "wave/data_structures/string_writer.h"
-#include "wave/files/file_lines_reader.h"
 #include "wave/exception_manager.h"
 #include "racso_sokoban_icons.h"
 #include <dolphin/dolphin.h>
@@ -15,30 +15,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <storage/storage.h>
 
-#define MAX_READ_BUFFER_SIZE 256
-#define MAX_FILENAME_LEN 256
-#define MAX_BOARD_SIZE 50
 #define MAX_UNDO_STATES 10
-
-typedef enum
-{
-    CellType_Empty,
-    CellType_Wall,
-    CellType_Box,
-    CellType_Target,
-    CellType_Player,
-    CellType_BoxOnTarget,
-    CellType_PlayerOnTarget
-} CellType;
-
-typedef struct Level
-{
-    int level_width, level_height;
-    int cell_size;
-    CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
-} Level;
 
 typedef struct GameState
 {
@@ -115,109 +93,6 @@ void victory_popup_handle_input(InputKey key, InputType type, AppContext* app)
             scene_manager_set_scene(app->sceneManager, SceneType_Menu);
             return;
         }
-    }
-}
-
-static int level_reader_parse_row(const char* line, CellType* row)
-{
-    const char *ch = line;
-    int i = 0;
-    while (true)
-    {
-        if (i >= MAX_BOARD_SIZE)
-            return -1;
-        switch (*(ch++))
-        {
-        case '\0':
-            return i;
-        case '#':
-            row[i++] = CellType_Wall;
-            break;
-        case '*':
-            row[i++] = CellType_BoxOnTarget;
-            break;
-        case '.':
-            row[i++] = CellType_Target;
-            break;
-        case '@':
-            row[i++] = CellType_Player;
-            break;
-        case '+':
-            row[i++] = CellType_PlayerOnTarget;
-            break;
-        case '$':
-            row[i++] = CellType_Box;
-            break;
-        case ' ':
-            row[i++] = CellType_Empty;
-            break;
-        default:
-            return -2;
-        }
-    }
-}
-
-static int level_reader_calculate_cell_size(int width, int height)
-{
-    #define MAX_WIDTH (128 + (cellSize - 1) * 2)
-    #define MAX_HEIGHT (64 + (cellSize - 1) * 2)
-
-    int cellSize = 9;
-    if (width * cellSize > MAX_WIDTH || height * cellSize > MAX_HEIGHT)
-        cellSize = 7;
-    if (width * cellSize > MAX_WIDTH || height * cellSize > MAX_HEIGHT)
-        cellSize = 5;
-    return cellSize;
-
-    #undef MAX_WIDTH
-    #undef MAX_HEIGHT
-}
-
-void level_reader_load_level(Level* ret_level, FileLinesReader* reader, int levelIndex)
-{
-    CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE] = {CellType_Empty};
-    int columnCount = 0, rowCount = 0;
-    char line[MAX_READ_BUFFER_SIZE];
-
-    char levelStartMark[16];
-    snprintf(levelStartMark, sizeof(levelStartMark), "%d", levelIndex + 1);
-
-    bool levelFound = false;
-    while (!levelFound && file_lines_reader_readln(reader, line, sizeof(line)))
-        if (strncmp(levelStartMark, line, sizeof(levelStartMark)) == 0)
-            levelFound = true;
-
-    furi_check(levelFound, "level not found");
-
-    while (file_lines_reader_readln(reader, line, sizeof(line)))
-    {
-        int rowSize = level_reader_parse_row(line, board[rowCount]);
-        if (rowSize < 0)
-            break;
-        if (rowSize > columnCount)
-            columnCount = rowSize;
-        rowCount += 1;
-        if (rowCount >= MAX_BOARD_SIZE)
-            break;
-    }
-
-    int naturalCellSize = level_reader_calculate_cell_size(columnCount, rowCount);
-    int rotatedCellSize = level_reader_calculate_cell_size(rowCount, columnCount);
-    if (naturalCellSize >= rotatedCellSize)
-    {
-        ret_level->cell_size = naturalCellSize;
-        ret_level->level_width = columnCount;
-        ret_level->level_height = rowCount;
-        memcpy(ret_level->board, board, sizeof(board));
-    }
-    else
-    {
-        ret_level->cell_size = rotatedCellSize;
-        ret_level->level_width = rowCount;
-        ret_level->level_height = columnCount;
-        for (int row = 0; row < rowCount; row++)
-            for (int column = 0; column < columnCount; column++)
-                ret_level->board[column][row] = board[row][column];
     }
 }
 
@@ -393,29 +268,13 @@ void game_state_initialize(GameState* state, Level* level)
 
 void load_selected_level(AppGameplayState* gameplayState, LevelsDatabase* database)
 {
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    File* file = storage_file_alloc(storage);
-    char filename[MAX_FILENAME_LEN];
-    snprintf(filename, MAX_FILENAME_LEN, "%s/%s.txt", STORAGE_APP_ASSETS_PATH_PREFIX, database->collections[gameplayState->selectedCollection].name);
-    for (int i = 0; filename[i] != '\0'; i++)
-        if (filename[i] >= 'A' && filename[i] <= 'Z')
-            filename[i] += 'a' - 'A';
-
-    FURI_LOG_D("GAME", "Opening file: %s", filename);
-    storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING);
-    FileLinesReader* reader = file_lines_reader_alloc(file, MAX_READ_BUFFER_SIZE);
-
-    FURI_LOG_D("GAME", "Loading level %d", gameplayState->selectedLevel);
-    level_reader_load_level(game.level, reader, gameplayState->selectedLevel);
-    FURI_LOG_D("GAME", "Level size: %d x %d", game.level->level_width, game.level->level_height);
+    const char *collectionName = database->collections[gameplayState->selectedCollection].name;
+    int levelIndex = gameplayState->selectedLevel;
+    level_load(game.level, collectionName, levelIndex);
 
     GameState* initialState = malloc(sizeof(GameState));
     game_state_initialize(initialState, game.level);
     stack_push(game.states, initialState);
-
-    file_lines_reader_free(reader);
-    storage_file_free(file);
-    furi_record_close(RECORD_STORAGE);
 }
 
 void game_transition_callback(int from, int to, void* context)
