@@ -97,7 +97,7 @@ const Icon* findIcon(CellType cellType, int size)
 {
     switch (cellType)
     {
-    case CellType_Wall:
+    case CellHasWall:
         switch (size)
         {
         case 5:
@@ -109,7 +109,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_Box:
+    case CellHasBox:
         switch (size)
         {
         case 5:
@@ -121,7 +121,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_Target:
+    case CellHasTarget:
         switch (size)
         {
         case 5:
@@ -133,7 +133,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_Player:
+    case CellHasPlayer:
         switch (size)
         {
         case 5:
@@ -145,7 +145,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_BoxOnTarget:
+    case CellHasBox | CellHasTarget:
         switch (size)
         {
         case 5:
@@ -157,7 +157,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_PlayerOnTarget:
+    case CellHasPlayer | CellHasTarget:
         switch (size)
         {
         case 5:
@@ -253,7 +253,7 @@ void game_state_initialize(GameState* state, Level* level)
     {
         for (int x = 0; x < level->level_width; x++)
         {
-            if (state->board[y][x] == CellType_Player || state->board[y][x] == CellType_PlayerOnTarget)
+            if (state->board[y][x] & CellHasPlayer)
             {
                 state->playerX = x;
                 state->playerY = y;
@@ -307,7 +307,7 @@ void verify_level_completed(GameState* state)
     {
         for (int x = 0; x < MAX_BOARD_SIZE; x++)
         {
-            if (state->board[y][x] == CellType_Box)
+            if ((state->board[y][x] & CellHasBox) && !(state->board[y][x] & CellHasTarget))
                 return;
         }
     }
@@ -322,27 +322,27 @@ void apply_input(GameState* gameState, int dx, int dy, Level* level)
         return;
 
     CellType newCell = gameState->board[newY][newX];
-    if (newCell == CellType_Wall)
+    if (newCell & CellHasWall)
         return;
 
-    if (newCell == CellType_Box || newCell == CellType_BoxOnTarget)
+    if (newCell & CellHasBox)
     {
         int newBoxX = newX + dx, newBoxY = newY + dy;
         if (newBoxX < 0 || newBoxX >= level->level_width || newBoxY < 0 || newBoxY >= level->level_height)
             return;
 
         CellType newBoxCell = gameState->board[newBoxY][newBoxX];
-        if (newBoxCell == CellType_Wall || newBoxCell == CellType_Box || newBoxCell == CellType_BoxOnTarget)
+        if ((newBoxCell & CellHasWall) || (newBoxCell && CellHasBox))
             return;
 
-        gameState->board[newBoxY][newBoxX] = newBoxCell == CellType_Target ? CellType_BoxOnTarget : CellType_Box;
-        newCell = newCell == CellType_BoxOnTarget ? CellType_Target : CellType_Empty;
-        gameState->board[newY][newX] = newCell;
+        gameState->board[newBoxY][newBoxX] |= CellHasBox;
+        gameState->board[newY][newX] = newCell & ~CellHasBox;
         gameState->pushesCount += 1;
     }
 
-    gameState->board[newY][newX] = newCell == CellType_Target ? CellType_PlayerOnTarget : CellType_Player;
-    gameState->board[gameState->playerY][gameState->playerX] = gameState->board[gameState->playerY][gameState->playerX] == CellType_PlayerOnTarget ? CellType_Target : CellType_Empty;
+    gameState->board[newY][newX] |= CellHasPlayer;
+    gameState->board[gameState->playerY][gameState->playerX] &= ~CellHasPlayer;
+
     gameState->playerX = newX;
     gameState->playerY = newY;
 }

@@ -2,16 +2,13 @@
 
 #define MAX_BOARD_SIZE 50
 
-typedef enum
-{
-    CellType_Empty,
-    CellType_Wall,
-    CellType_Box,
-    CellType_Target,
-    CellType_Player,
-    CellType_BoxOnTarget,
-    CellType_PlayerOnTarget
-} CellType;
+typedef char CellType;
+enum {
+    CellHasWall = 0x1,
+    CellHasBox = 0x2,
+    CellHasTarget = 0x4,
+    CellHasPlayer = 0x8
+};
 
 typedef struct Level
 {

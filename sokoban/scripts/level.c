@@ -19,25 +19,25 @@ static int parse_row(const char* line, CellType* row)
         case '\0':
             return i;
         case '#':
-            row[i++] = CellType_Wall;
+            row[i++] = CellHasWall;
             break;
         case '*':
-            row[i++] = CellType_BoxOnTarget;
+            row[i++] = CellHasBox | CellHasTarget;
             break;
         case '.':
-            row[i++] = CellType_Target;
+            row[i++] = CellHasTarget;
             break;
         case '@':
-            row[i++] = CellType_Player;
+            row[i++] = CellHasPlayer;
             break;
         case '+':
-            row[i++] = CellType_PlayerOnTarget;
+            row[i++] = CellHasPlayer | CellHasTarget;
             break;
         case '$':
-            row[i++] = CellType_Box;
+            row[i++] = CellHasBox;
             break;
         case ' ':
-            row[i++] = CellType_Empty;
+            row[i++] = 0;
             break;
         default:
             return -2;
@@ -80,7 +80,7 @@ void level_load(Level* ret_level, const char* collectionName, int levelIndex)
 
     FURI_LOG_D("GAME", "Loading level %d", levelIndex);
 
-    CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE] = {CellType_Empty};
+    CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE] = {0};
     int columnCount = 0, rowCount = 0;
 
     char levelStartMark[16];
