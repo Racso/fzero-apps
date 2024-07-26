@@ -1,3 +1,6 @@
+## v1.5
+- You can now undo up to 256 moves.
+
 ## v1.4
 - Level drawing improved: partial overdraw allowed for borders, boards are now centered, boards are rotated if that fits better.
 - Menus now auto-select the first unplayed level by default.
