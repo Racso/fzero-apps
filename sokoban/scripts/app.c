@@ -14,7 +14,6 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 */
 
 #include "app.h"
-#include "app_gameplay.h"
 #include "scene_menu.h"
 #include "scene_game.h"
 #include "scene_credits.h"

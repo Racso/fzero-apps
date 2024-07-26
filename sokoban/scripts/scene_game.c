@@ -1,7 +1,5 @@
 #include "scene_game.h"
 #include "app.h"
-#include "game.h"
-#include "app_gameplay.h"
 #include "save_data_manager.h"
 #include "wave/scene_management.h"
 #include "wave/calc.h"

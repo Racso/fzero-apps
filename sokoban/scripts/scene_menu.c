@@ -1,6 +1,4 @@
 #include "app.h"
-#include "game.h"
-#include "app_gameplay.h"
 #include "racso_sokoban_icons.h"
 #include "wave/scene_management.h"
 #include "wave/pagination.h"
