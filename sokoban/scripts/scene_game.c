@@ -1,15 +1,11 @@
 #include "scene_game.h"
 #include "app.h"
-#include "game.h"
-#include "app_gameplay.h"
-#include "save_data_manager.h"
+#include "levels_database.h"
+#include "level.h"
+#include "game_state.h"
 #include "wave/scene_management.h"
 #include "wave/calc.h"
-#include "wave/data_structures/stack.h"
-#include "wave/data_structures/list.h"
 #include "wave/data_structures/string_writer.h"
-#include "wave/files/file_lines_reader.h"
-#include "wave/exception_manager.h"
 #include "racso_sokoban_icons.h"
 #include <dolphin/dolphin.h>
 #include <gui/gui.h>
@@ -17,45 +13,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <storage/storage.h>
 
-#define MAX_READ_BUFFER_SIZE 256
-#define MAX_FILENAME_LEN 256
-#define MAX_BOARD_SIZE 50
-#define MAX_UNDO_STATES 10
+const int MAX_UNDO_STATES = 256;
 
-typedef enum
-{
-    CellType_Empty,
-    CellType_Wall,
-    CellType_Box,
-    CellType_Target,
-    CellType_Player,
-    CellType_BoxOnTarget,
-    CellType_PlayerOnTarget
-} CellType;
-
-typedef struct Level
-{
-    int level_width, level_height;
-    int cell_size;
-    CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
-} Level;
-
-typedef struct GameState
-{
-    int playerX, playerY, pushesCount;
-    CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE];
-} GameState;
-
-typedef struct GameContext
-{
-    Stack* states;
+static struct {
     Level* level;
-    bool isCompleted;
-} GameContext;
-
-static GameContext game;
+    GameState* state;
+} game;
 
 // Victory Popup component
 void victory_popup_render_callback(Canvas* const canvas, AppContext* app)
@@ -66,7 +30,7 @@ void victory_popup_render_callback(Canvas* const canvas, AppContext* app)
     LevelsDatabase* database = app->database;
     LevelItem* levelItem = &database->collections[gameplayState->selectedCollection].levels[gameplayState->selectedLevel];
 
-    GameState* state = stack_peek(game.states);
+    GameState* state = game.state;
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -120,114 +84,11 @@ void victory_popup_handle_input(InputKey key, InputType type, AppContext* app)
     }
 }
 
-static int level_reader_parse_row(const char* line, CellType* row)
-{
-    const char *ch = line;
-    int i = 0;
-    while (true)
-    {
-        if (i >= MAX_BOARD_SIZE)
-            return -1;
-        switch (*(ch++))
-        {
-        case '\0':
-            return i;
-        case '#':
-            row[i++] = CellType_Wall;
-            break;
-        case '*':
-            row[i++] = CellType_BoxOnTarget;
-            break;
-        case '.':
-            row[i++] = CellType_Target;
-            break;
-        case '@':
-            row[i++] = CellType_Player;
-            break;
-        case '+':
-            row[i++] = CellType_PlayerOnTarget;
-            break;
-        case '$':
-            row[i++] = CellType_Box;
-            break;
-        case ' ':
-            row[i++] = CellType_Empty;
-            break;
-        default:
-            return -2;
-        }
-    }
-}
-
-static int level_reader_calculate_cell_size(int width, int height)
-{
-    #define MAX_WIDTH (128 + (cellSize - 1) * 2)
-    #define MAX_HEIGHT (64 + (cellSize - 1) * 2)
-
-    int cellSize = 9;
-    if (width * cellSize > MAX_WIDTH || height * cellSize > MAX_HEIGHT)
-        cellSize = 7;
-    if (width * cellSize > MAX_WIDTH || height * cellSize > MAX_HEIGHT)
-        cellSize = 5;
-    return cellSize;
-
-    #undef MAX_WIDTH
-    #undef MAX_HEIGHT
-}
-
-void level_reader_load_level(Level* ret_level, FileLinesReader* reader, int levelIndex)
-{
-    CellType board[MAX_BOARD_SIZE][MAX_BOARD_SIZE] = {CellType_Empty};
-    int columnCount = 0, rowCount = 0;
-    char line[MAX_READ_BUFFER_SIZE];
-
-    char levelStartMark[16];
-    snprintf(levelStartMark, sizeof(levelStartMark), "%d", levelIndex + 1);
-
-    bool levelFound = false;
-    while (!levelFound && file_lines_reader_readln(reader, line, sizeof(line)))
-        if (strncmp(levelStartMark, line, sizeof(levelStartMark)) == 0)
-            levelFound = true;
-
-    furi_check(levelFound, "level not found");
-
-    while (file_lines_reader_readln(reader, line, sizeof(line)))
-    {
-        int rowSize = level_reader_parse_row(line, board[rowCount]);
-        if (rowSize < 0)
-            break;
-        if (rowSize > columnCount)
-            columnCount = rowSize;
-        rowCount += 1;
-        if (rowCount >= MAX_BOARD_SIZE)
-            break;
-    }
-
-    int naturalCellSize = level_reader_calculate_cell_size(columnCount, rowCount);
-    int rotatedCellSize = level_reader_calculate_cell_size(rowCount, columnCount);
-    if (naturalCellSize >= rotatedCellSize)
-    {
-        ret_level->cell_size = naturalCellSize;
-        ret_level->level_width = columnCount;
-        ret_level->level_height = rowCount;
-        memcpy(ret_level->board, board, sizeof(board));
-    }
-    else
-    {
-        ret_level->cell_size = rotatedCellSize;
-        ret_level->level_width = rowCount;
-        ret_level->level_height = columnCount;
-        for (int row = 0; row < rowCount; row++)
-            for (int column = 0; column < columnCount; column++)
-                ret_level->board[column][row] = board[row][column];
-    }
-}
-
 const Icon* findIcon(CellType cellType, int size)
 {
     switch (cellType)
     {
-    case CellType_Wall:
+    case CellHasWall:
         switch (size)
         {
         case 5:
@@ -239,7 +100,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_Box:
+    case CellHasBox:
         switch (size)
         {
         case 5:
@@ -251,7 +112,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_Target:
+    case CellHasTarget:
         switch (size)
         {
         case 5:
@@ -263,7 +124,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_Player:
+    case CellHasPlayer:
         switch (size)
         {
         case 5:
@@ -275,7 +136,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_BoxOnTarget:
+    case CellHasBox | CellHasTarget:
         switch (size)
         {
         case 5:
@@ -287,7 +148,7 @@ const Icon* findIcon(CellType cellType, int size)
         }
         break;
 
-    case CellType_PlayerOnTarget:
+    case CellHasPlayer | CellHasTarget:
         switch (size)
         {
         case 5:
@@ -306,10 +167,10 @@ const Icon* findIcon(CellType cellType, int size)
     return NULL;
 }
 
-void draw_game(Canvas* const canvas, GameContext* game)
+void draw_game(Canvas* const canvas)
 {
-    GameState* state = stack_peek(game->states);
-    Level *level = game->level;
+    GameState* state = game.state;
+    Level *level = game.level;
 
     int cellSize = level->cell_size;
     int levelWidth = level->level_width * cellSize;
@@ -350,74 +211,16 @@ void game_render_callback(Canvas* const canvas, void* context)
     AppContext* app = (AppContext*)context;
 
     canvas_clear(canvas);
-    GameState* state = stack_peek(game.states);
+    GameState* state = game.state;
     Level* level = game.level;
 
     if (state == NULL || level == NULL)
         return;
 
-    draw_game(canvas, &game);
-
-    if (game.isCompleted)
+    if (game.state->isCompleted)
         victory_popup_render_callback(canvas, app);
-}
-
-void game_state_initialize(GameState* state, Level* level)
-{
-    if (state == NULL)
-    {
-        throw_exception("state cannot be null");
-        return;
-    }
-
-    if (level == NULL)
-    {
-        throw_exception("level cannot be null");
-        return;
-    }
-
-    state->playerX = state->playerY = state->pushesCount = 0;
-    memcpy(state->board, level->board, sizeof(CellType) * MAX_BOARD_SIZE * MAX_BOARD_SIZE);
-
-    for (int y = 0; y < level->level_height; y++)
-    {
-        for (int x = 0; x < level->level_width; x++)
-        {
-            if (state->board[y][x] == CellType_Player || state->board[y][x] == CellType_PlayerOnTarget)
-            {
-                state->playerX = x;
-                state->playerY = y;
-                return;
-            }
-        }
-    }
-}
-
-void load_selected_level(AppGameplayState* gameplayState, LevelsDatabase* database)
-{
-    Storage* storage = furi_record_open(RECORD_STORAGE);
-    File* file = storage_file_alloc(storage);
-    char filename[MAX_FILENAME_LEN];
-    snprintf(filename, MAX_FILENAME_LEN, "%s/%s.txt", STORAGE_APP_ASSETS_PATH_PREFIX, database->collections[gameplayState->selectedCollection].name);
-    for (int i = 0; filename[i] != '\0'; i++)
-        if (filename[i] >= 'A' && filename[i] <= 'Z')
-            filename[i] += 'a' - 'A';
-
-    FURI_LOG_D("GAME", "Opening file: %s", filename);
-    storage_file_open(file, filename, FSAM_READ, FSOM_OPEN_EXISTING);
-    FileLinesReader* reader = file_lines_reader_alloc(file, MAX_READ_BUFFER_SIZE);
-
-    FURI_LOG_D("GAME", "Loading level %d", gameplayState->selectedLevel);
-    level_reader_load_level(game.level, reader, gameplayState->selectedLevel);
-    FURI_LOG_D("GAME", "Level size: %d x %d", game.level->level_width, game.level->level_height);
-
-    GameState* initialState = malloc(sizeof(GameState));
-    game_state_initialize(initialState, game.level);
-    stack_push(game.states, initialState);
-
-    file_lines_reader_free(reader);
-    storage_file_free(file);
-    furi_record_close(RECORD_STORAGE);
+    else
+        draw_game(canvas);
 }
 
 void game_transition_callback(int from, int to, void* context)
@@ -428,75 +231,32 @@ void game_transition_callback(int from, int to, void* context)
 
     if (from == SceneType_Game)
     {
-        while (stack_count(game.states) > 0)
-        {
-            GameState* state = stack_pop(game.states);
-            free(state);
-        }
-
-        stack_free(game.states);
+        game_state_free(game.state);
         free(game.level);
     }
 
     if (to == SceneType_Game)
     {
+        const char *collectionName = database->collections[gameplayState->selectedCollection].name;
+        int levelIndex = gameplayState->selectedLevel;
+
         game.level = malloc(sizeof(Level));
-        game.states = stack_alloc();
-        game.isCompleted = false;
-        load_selected_level(gameplayState, database);
+        level_load(game.level, collectionName, levelIndex);
+
+        game.state = game_state_initialize(game.level, MAX_UNDO_STATES);
     }
 }
 
-void verify_level_completed(GameState* state)
-{
-    for (int y = 0; y < MAX_BOARD_SIZE; y++)
-    {
-        for (int x = 0; x < MAX_BOARD_SIZE; x++)
-        {
-            if (state->board[y][x] == CellType_Box)
-                return;
-        }
-    }
-
-    game.isCompleted = true;
-}
-
-void apply_input(GameState* gameState, int dx, int dy, Level* level)
-{
-    int newX = gameState->playerX + dx, newY = gameState->playerY + dy;
-    if (newX < 0 || newX >= level->level_width || newY < 0 || newY >= level->level_height)
-        return;
-
-    CellType newCell = gameState->board[newY][newX];
-    if (newCell == CellType_Wall)
-        return;
-
-    if (newCell == CellType_Box || newCell == CellType_BoxOnTarget)
-    {
-        int newBoxX = newX + dx, newBoxY = newY + dy;
-        if (newBoxX < 0 || newBoxX >= level->level_width || newBoxY < 0 || newBoxY >= level->level_height)
-            return;
-
-        CellType newBoxCell = gameState->board[newBoxY][newBoxX];
-        if (newBoxCell == CellType_Wall || newBoxCell == CellType_Box || newBoxCell == CellType_BoxOnTarget)
-            return;
-
-        gameState->board[newBoxY][newBoxX] = newBoxCell == CellType_Target ? CellType_BoxOnTarget : CellType_Box;
-        newCell = newCell == CellType_BoxOnTarget ? CellType_Target : CellType_Empty;
-        gameState->board[newY][newX] = newCell;
-        gameState->pushesCount += 1;
-    }
-
-    gameState->board[newY][newX] = newCell == CellType_Target ? CellType_PlayerOnTarget : CellType_Player;
-    gameState->board[gameState->playerY][gameState->playerX] = gameState->board[gameState->playerY][gameState->playerX] == CellType_PlayerOnTarget ? CellType_Target : CellType_Empty;
-    gameState->playerX = newX;
-    gameState->playerY = newY;
-}
-
-void game_handle_player_input(InputKey key, InputType type, GameContext* gameContext)
+void game_handle_player_input(InputKey key, InputType type)
 {
     if (type != InputTypePress && type != InputTypeRepeat)
         return;
+
+    if (key == InputKeyOk)
+    {
+        game_state_undo_move(game.state);
+        return;
+    }
 
     int dx = 0, dy = 0;
     switch (key)
@@ -517,34 +277,13 @@ void game_handle_player_input(InputKey key, InputType type, GameContext* gameCon
         return;
     }
 
-    Level* level = gameContext->level;
-    GameState* previousGameState = stack_peek(gameContext->states);
-    GameState* gameState = malloc(sizeof(GameState));
-    memcpy(gameState, previousGameState, sizeof(GameState));
-
-    apply_input(gameState, dx, dy, level);
-
-    if (gameState->playerX != previousGameState->playerX || gameState->playerY != previousGameState->playerY)
-    {
-        if (stack_count(gameContext->states) >= MAX_UNDO_STATES)
-        {
-            GameState* state = stack_discard_bottom(gameContext->states);
-            free(state);
-        }
-
-        stack_push(gameContext->states, gameState);
-        verify_level_completed(gameState);
-    }
-    else
-    {
-        free(gameState);
-    }
+    game_state_apply_move(game.state, dx, dy);
 }
 
 void game_handle_input(InputKey key, InputType type, void* context)
 {
     AppContext* app = (AppContext*)context;
-    GameState* gameState = stack_peek(game.states);
+    GameState* gameState = game.state;
 
     if (key == InputKeyBack && type == InputTypePress)
     {
@@ -552,26 +291,15 @@ void game_handle_input(InputKey key, InputType type, void* context)
         return;
     }
 
-    if (game.isCompleted)
+    if (game.state->isCompleted)
     {
         victory_popup_handle_input(key, type, app);
         return;
     }
 
-    if (key == InputKeyOk && (type == InputTypePress || type == InputTypeRepeat))
-    {
-        if (stack_count(game.states) > 1)
-        {
-            GameState* state = stack_pop(game.states);
-            free(state);
-        }
-        return;
-    }
+    game_handle_player_input(key, type);
 
-    game_handle_player_input(key, type, &game);
-    gameState = stack_peek(game.states);
-
-    if (game.isCompleted)
+    if (game.state->isCompleted)
     {
         FURI_LOG_D("GAME", "Level completed in %d pushes", gameState->pushesCount);
 
