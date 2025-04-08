@@ -5,7 +5,6 @@
 #include "game_state.h"
 #include "wave/scene_management.h"
 #include "wave/calc.h"
-#include "wave/data_structures/string_writer.h"
 #include "racso_sokoban_icons.h"
 #include <dolphin/dolphin.h>
 #include <gui/gui.h>
@@ -38,25 +37,18 @@ void victory_popup_render_callback(Canvas* const canvas, AppContext* app)
     canvas_draw_str_aligned(canvas, 64, 0, AlignCenter, AlignTop, "COMPLETED!");
 
     canvas_set_font(canvas, FontSecondary);
+    char str[256];
 
-    StringWriter* writer = string_writer_alloc(100);
-    string_writer_add_str(writer, "Pushes: ");
-    string_writer_add_int(writer, state->pushesCount);
-    canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, string_writer_get(writer));
+    snprintf(str, sizeof(str), "Pushes: %d", state->pushesCount);
+    canvas_draw_str_aligned(canvas, 64, 20, AlignCenter, AlignCenter, str);
 
     canvas_draw_icon(canvas, 32 - ICON_SIDE / 2, 28, &I_checkbox_checked);
-    string_writer_clear(writer);
-    string_writer_add_str(writer, "Best: ");
-    string_writer_add_int(writer, levelItem->playerBest);
-    canvas_draw_str_aligned(canvas, 32, 42, AlignCenter, AlignCenter, string_writer_get(writer));
+    snprintf(str, sizeof(str), "Best: %d", levelItem->playerBest);
+    canvas_draw_str_aligned(canvas, 32, 42, AlignCenter, AlignCenter, str);
 
     canvas_draw_icon(canvas, 96 - ICON_SIDE / 2, 28, &I_star);
-    string_writer_clear(writer);
-    string_writer_add_str(writer, "World: ");
-    string_writer_add_int(writer, levelItem->worldBest);
-    canvas_draw_str_aligned(canvas, 96, 42, AlignCenter, AlignCenter, string_writer_get(writer));
-
-    string_writer_free(writer);
+    snprintf(str, sizeof(str), "World: %d", levelItem->worldBest);
+    canvas_draw_str_aligned(canvas, 96, 42, AlignCenter, AlignCenter, str);
 
     const int START_CENTER_X = 100, START_CENTER_Y = 59;
     canvas_draw_circle(canvas, START_CENTER_X, START_CENTER_Y, 4);
