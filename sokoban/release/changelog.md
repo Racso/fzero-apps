@@ -1,3 +1,7 @@
+## v1.6
+- Internal code refactoring and cleanup.
+- Compatibility with latest firmware.
+
 ## v1.5
 - You can now undo up to 256 moves.
 
